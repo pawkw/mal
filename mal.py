@@ -1,6 +1,6 @@
-from functions.read import read
-from functions.eval import eval
-from functions.print_mal import print_mal
+from modules.read import read
+from modules.eval import eval
+from modules.print_mal import print_mal
 
 def rep(exp: str) -> str:
     return print_mal(eval([read(exp)], []))
