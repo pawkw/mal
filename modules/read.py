@@ -1,7 +1,7 @@
 from typing import List
-from Reader import Reader
-from Token import Token
-from Atom import Atom
+from modules.Reader import Reader
+from modules.Token import Token
+from modules.Atom import Atom
 
 def read_atom(reader: Reader) -> Atom:
     string = reader.peek().token_str
@@ -27,10 +27,10 @@ def read_form(reader: Reader) -> List:
         return read_list(reader)
     return read_atom(reader)
 
-def read(string: str) -> str:
+def read_str(string: str) -> str:
     reader = Reader(string)
     return read_form(reader)
 
 if __name__ == "__main__":
-    print(read("123"))
-    print(read("(add (divide 123 456) 789)"))
+    print(read_str("123"))
+    print(read_str("(add (divide 123 456) 789)"))

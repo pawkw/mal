@@ -1,5 +1,5 @@
-from Token import Token
-from Tokenizer import tokenizer
+from modules.Token import Token
+from modules.Tokenizer import tokenizer
 
 class Reader:
     def __init__(self, string: str) -> None:

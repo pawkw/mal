@@ -1,9 +1,9 @@
-from modules.read import read
+from modules.read import read_str
 from modules.eval import eval
 from modules.print_mal import print_mal
 
 def rep(exp: str) -> str:
-    return print_mal(eval([read(exp)], []))
+    return print_mal(eval(read_str(exp), []))
 
 if __name__ == "__main__":
     while True:

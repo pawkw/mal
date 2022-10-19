@@ -1,5 +1,5 @@
 import re
-from Token import Token
+from modules.Token import Token
 # Taken from Make a Lisp project.
 pattern = re.compile(r"""[\s,]*(~@|[\[\]{}()'`~^@]|"(?:[\\].|[^\\"])*"?|;.*|[^\s\[\]{}()'"`@,;]+)""");
 
