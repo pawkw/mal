@@ -1,4 +1,3 @@
-from numpy import integer
 from modules.Atom import Atom
 
 builtins = {
