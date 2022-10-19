@@ -6,7 +6,7 @@ from modules.Collection import Collection
 def read_atom(reader: Reader) -> Atom:
     string = reader.peek().token_str
     if string.isnumeric():
-        return Atom.integer(string, int(string))
+        return Atom.integer(int(string))
     
     if string[0] == '"':
         if string[-1] == '"':
@@ -47,7 +47,7 @@ def read_form(reader: Reader) -> Collection:
     if peek == '[':
         return Collection.vector(read_list(reader, ']'))
     if peek == '{':
-        return Collection.list(read_list(reader, '}'))
+        return Collection.hashmap(read_list(reader, '}'))
     return read_atom(reader)
 
 def read_str(string: str) -> str:

@@ -12,8 +12,8 @@ class Atom:
         return f"Atom({self.string!r} {self.type} {self.value})"
 
     @classmethod
-    def integer(cls, string: str, value: int) -> "Atom":
-        return cls(string, cls.TYPES[0], value)
+    def integer(cls, value: int) -> "Atom":
+        return cls(str(value), cls.TYPES[0], value)
 
     @classmethod
     def symbol(cls, string: str) -> "Atom":

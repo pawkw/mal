@@ -1,5 +1,4 @@
-from asyncore import read
-from typing import List
+from typing import List, Any
 from modules.Atom import Atom
 from modules.Collection import Collection
 
@@ -28,15 +27,22 @@ def get_value(item: Atom, convert_strings) -> str:
     return result
 
 
-def mal_string(exp: Collection, readably) -> str:
+def mal_string(exp: Any, readably) -> str:
     if not isinstance(exp, Collection):
         return (exp.type + ":" if readably else "") + get_value(exp, readably)
     result = exp.type + exp.start
-    for item in exp.contents:
-        if type(item) == Atom:
-            result += " " + (item.type  + ":" if readably else "") + get_value(item, readably) + " "
-        else:
-            result += mal_string(item, readably)
+    if exp.type == "hashmap":
+        for (key, item) in exp.contents.items():
+            if type(item) == Atom:
+                result += " " + key.string  + ":" + get_value(item, readably) + " "
+            else:
+                result += " " + key.string  + ":" + mal_string(item, readably)
+    else:
+        for item in exp.contents:
+            if type(item) == Atom:
+                result += " " + (item.type  + ":" if readably else "") + get_value(item, readably) + " "
+            else:
+                result += mal_string(item, readably)
     result += exp.end
     return result
 

@@ -19,4 +19,7 @@ class Collection:
 
     @classmethod
     def hashmap(cls, contents) -> "Collection":
-        return cls(cls.TYPES[2], contents, '{', '}')
+        items = iter(contents)
+        items = iter(contents)
+        result = dict(zip(items, items))
+        return cls(cls.TYPES[2], result, '{', '}')

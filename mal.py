@@ -1,9 +1,13 @@
+import builtins
 from modules.read import read_str
 from modules.eval import eval
 from modules.print_mal import print_mal
+from modules.builtins import builtins
+
+root_env = builtins
 
 def rep(exp: str) -> str:
-    return print_mal(eval(read_str(exp), []))
+    return print_mal(eval(read_str(exp), root_env))
 
 if __name__ == "__main__":
     while True:
