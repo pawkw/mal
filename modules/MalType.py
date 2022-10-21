@@ -12,8 +12,10 @@ class MalType:
     def __repr__(self) -> str:
         if not self.isCollection():
             if self.type == "hashkey":
-                return f"{self.type}(:{str(self.data[1:])})"
-            return f"{self.type}({str(self.data)})"
+                return f"{self.type}: :{str(self.data[1:])}"
+            if self.type in ["false", "true", "nil"]:
+                return self.type
+            return f"{self.type}: {str(self.data)}"
 
         if self.isEmpty():
             return f"{self.type}(empty)" 
@@ -79,3 +81,9 @@ class MalType:
     @classmethod
     def comment(cls, contents: str) -> "MalType":
         return cls("vector", contents)
+
+    @classmethod
+    def function(cls, contents: Any, builtin = False) -> "MalType":
+        result = cls("function", contents)
+        result.builtin = builtin
+        return result

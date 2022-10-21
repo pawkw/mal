@@ -1,30 +1,47 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 # from modules.Collection import Collection
 # from modules.Atom import Atom
 from modules.MalType import MalType
+from modules.Env import Env
 
-def eval_ast(ast: MalType, env: Dict) -> MalType:
+def apply(ast: MalType, env: Env) -> MalType:
+    first = ast.data[0]
+    if first.data == 'def!':
+        env.set(ast.data[1].data, ast.data[2])
+        return env.get(ast.data[1].data)
+
+    if first.data == 'let*':
+        newEnv = Env(env)
+        args = ast.data[1]
+        keys = args.data[::2]
+        vals = args.data[1::2]
+        while keys:
+            newEnv.set(keys.pop().data, vals.pop())
+        return eval(ast.data[2], newEnv)
+
+    ast = eval_ast(ast, env)
+    result = ast[0].data(ast[1:])
+    return result
+
+def eval_ast(ast: MalType, env: Env) -> MalType:
     if not ast.isCollection():
         if ast.type == 'symbol':
-            if ast.data in env:
-                return env[ast.data]
-            else:
-                raise Exception(f"{ast.data} not found in current namespace.")
+            result = env.get(ast.data)
+            if result.type != 'nil':
+                return result
+            raise Exception(f"{ast.data} not found in scope.\n{env}")
     if ast.isCollection():
         if ast.type == 'list':
             contents = [eval(x, env) for x in ast.data]
             return contents
     return ast
 
-def eval(ast: MalType, env: Dict) -> MalType:
+def eval(ast: MalType, env: Env) -> MalType:
     if ast.isCollection():
         if ast.isEmpty():
             return ast
         if ast.type == "list":
-            ast = eval_ast(ast, env)
-            func = ast[0]
-            result = func(*ast[1:])
-            return result
+            return apply(ast, env)
         if ast.type == "vector":
             return MalType.vector([eval(x, env) for x in ast.data])
         if ast.type == "hashmap":
