@@ -20,5 +20,5 @@ if __name__ == "__main__":
             print("\nExiting.")
             break
         except Exception as e:
-            print(f"\nError: {e}")
+            print(f"\nError: {e.with_traceback()}")
             exit(1)

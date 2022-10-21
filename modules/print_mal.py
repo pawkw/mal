@@ -1,14 +1,18 @@
 from typing import List, Any
-from modules.Atom import Atom
-from modules.Collection import Collection
+# from modules.Atom import Atom
+# from modules.Collection import Collection
+from modules.MalType import MalType, delimiters
 
-def get_value(item: Atom, convert_strings) -> str:
+def get_value(item: MalType, convert_strings) -> str:
+    if item.type == "hashkey":
+        return ':' + item.data[1:]
+
     if item.type != "string" or not convert_strings:
-        return item.string
+        return str(item.data)
 
     result = ""
     escape = False
-    for char in item.value:
+    for char in item.data:
         if escape:
             if char == 'n':
                 result += '\n'
@@ -17,34 +21,29 @@ def get_value(item: Atom, convert_strings) -> str:
             elif char == '"':
                 result += '"'
             escape = False
+            continue
                 
-        elif char == "\\":
+        if char == "\\":
             escape = True
             continue
 
-        else:
-            result += char
+        result += char
     return result
 
 
-def mal_string(exp: Any, readably) -> str:
-    if not isinstance(exp, Collection):
+def mal_string(exp: MalType, readably: bool) -> str:
+    if not exp.isCollection():
         return (exp.type + ":" if readably else "") + get_value(exp, readably)
-    result = exp.type + exp.start
-    if exp.type == "hashmap":
-        for (key, item) in exp.contents.items():
-            if type(item) == Atom:
-                result += " " + key.string  + ":" + get_value(item, readably) + " "
-            else:
-                result += " " + key.string  + ":" + mal_string(item, readably)
-    else:
-        for item in exp.contents:
-            if type(item) == Atom:
-                result += " " + (item.type  + ":" if readably else "") + get_value(item, readably) + " "
-            else:
-                result += mal_string(item, readably)
-    result += exp.end
+    
+    result = ""
+    for item in exp.data:
+        if not item.isCollection():
+            result += " " + (item.type  + ":" if readably else "") + get_value(item, readably) + " "
+            continue
+        result += mal_string(item, readably)
+    result = delimiters[exp.type]['start'] + result + delimiters[exp.type]['end']
     return result
 
-def print_mal(exp: List, readably = True) -> None:
-    print(mal_string(exp, True))
+def print_mal(exp: MalType, readably = True) -> None:
+    print(exp)
+    # print(mal_string(exp, True))

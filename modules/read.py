@@ -1,34 +1,35 @@
 from typing import List
 from modules.Reader import Reader
-from modules.Atom import Atom
-from modules.Collection import Collection
+# from modules.Atom import Atom
+# from modules.Collection import Collection
+from modules.MalType import MalType
 
-def read_atom(reader: Reader) -> Atom:
+def read_atom(reader: Reader) -> MalType:
     string = reader.peek().token_str
     if string.isnumeric():
-        return Atom.integer(int(string))
+        return MalType.integer(int(string))
     
     if string[0] == '"':
         if string[-1] == '"':
-            return Atom.string(string, string[1:-1])
+            return MalType.string(string[1:-1])
         raise Exception(f'Expected a " to close string {string}')
 
     if string[0] == ':':
-        return Atom.hashkey(string[1:])
+        return MalType.hashkey(str(chr(255)) + string[1:])
 
     if string == 'true':
-        return Atom.true()
+        return MalType.true()
 
     if string == 'nil':
-        return Atom.nil()
+        return MalType.nil()
 
     if string == 'false':
-        return Atom.false()
+        return MalType.false()
 
     if string[0] == ';':
-        return Atom.comment(string)
+        return MalType.comment(string)
 
-    return Atom.symbol(string)
+    return MalType.symbol(string)
 
 def read_list(reader: Reader, delimiter: str) -> List:
     result = []
@@ -40,14 +41,14 @@ def read_list(reader: Reader, delimiter: str) -> List:
             return result
         result.append(read_form(reader))
 
-def read_form(reader: Reader) -> Collection:
+def read_form(reader: Reader) -> MalType:
     peek = reader.peek().token_str
     if peek == '(':
-        return Collection.list(read_list(reader, ')'))
+        return MalType.list(read_list(reader, ')'))
     if peek == '[':
-        return Collection.vector(read_list(reader, ']'))
+        return MalType.vector(read_list(reader, ']'))
     if peek == '{':
-        return Collection.hashmap(read_list(reader, '}'))
+        return MalType.hashmap(read_list(reader, '}'))
     return read_atom(reader)
 
 def read_str(string: str) -> str:
