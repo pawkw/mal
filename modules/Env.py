@@ -7,7 +7,7 @@ class Env:
         self.parent = parent
         if binds:
             for var, value in zip(binds, exprs):
-                self.set(var, value)
+                self.set(var.data, value)
 
     def __str__(self) -> str:
         result = ""
@@ -23,17 +23,16 @@ class Env:
 
     def find(self, key: MalType) -> "Env":
         if key in self.data:
-            # print(f"Found {key}")
             return self
 
         if self.parent is None:
-            # print("Parent is None.")
+            print("Parent is None.")
             return None
 
         return self.parent.find(key)
 
-    def get(self, key):
-        result = self.find(key)
+    def get(self, key: MalType):
+        result = self.find(key.data)
         if result is None:
             return MalType.nil()
-        return result.data[key]
+        return result.data[key.data]

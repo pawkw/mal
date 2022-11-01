@@ -1,5 +1,5 @@
 import builtins
-import traceback
+from modules.MalType import MalType
 from modules.read import read_str
 from modules.eval import eval
 from modules.print_mal import print_mal
@@ -9,6 +9,7 @@ from modules.Env import Env
 root_env = Env(None)
 for func in builtins.items():
     root_env.set(func[0], func[1])
+root_env.set('not', eval(read_str('(def! not (fn* (a) (if a false true)))'), root_env))
 
 def rep(exp: str) -> str:
     return print_mal(eval(read_str(exp), root_env))

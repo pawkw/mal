@@ -1,22 +1,27 @@
 from typing import Dict, Any, List
-# from modules.Collection import Collection
-# from modules.Atom import Atom
+from functools import partial
 from modules.MalType import MalType
 from modules.Env import Env
 
 def apply(ast: MalType, env: Env) -> MalType:
+    def fn(binds: MalType, body: MalType, exprs: MalType, env: Env):
+        newEnv = Env(env, binds.data, exprs)
+        return eval(body, newEnv)
+
     first = ast.data[0]
     if first.data == 'def!':
         env.set(ast.data[1].data, eval(ast.data[2], env))
-        return env.get(ast.data[1].data)
+        return env.get(ast.data[1])
+
+    if first.data == 'env':
+        print(env)
+        return MalType.nil()
 
     if first.data == 'let*':
-        newEnv = Env(env)
         args = ast.data[1]
         keys = args.data[::2]
         vals = args.data[1::2]
-        while keys:
-            newEnv.set(keys.pop().data, eval(vals.pop(), env))
+        newEnv = Env(env, keys, vals)
         return eval(ast.data[2], newEnv)
 
     if first.data == 'do':
@@ -30,15 +35,18 @@ def apply(ast: MalType, env: Env) -> MalType:
             return MalType.nil()
         return eval(ast.data[3], env)
 
+    if first.data == 'fn*':
+        return MalType.function(partial(fn, ast.data[1], ast.data[2]))
+
     ast = eval_ast(ast, env)
-    result = ast[0].data(ast[1:])
+    result = ast[0].data(ast[1:], env)
     return result
 
 def eval_ast(ast: MalType, env: Env) -> MalType:
     if not ast.isCollection():
         if ast.type == 'symbol':
-            result = env.get(ast.data)
-            if result.type != 'nil':
+            result = env.get(ast)
+            if not result.isType('nil'):
                 return result
             raise Exception(f"{ast.data} not found in scope.\n{env}")
     if ast.isCollection():
