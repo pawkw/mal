@@ -2,9 +2,12 @@ from modules.MalType import MalType
 from typing import Any
 
 class Env:
-    def __init__(self, parent: "Env") -> None:
+    def __init__(self, parent: "Env", binds = None, exprs = None) -> None:
         self.data = {}
         self.parent = parent
+        if binds:
+            for var, value in zip(binds, exprs):
+                self.set(var, value)
 
     def __str__(self) -> str:
         result = ""

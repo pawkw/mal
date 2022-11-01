@@ -19,6 +19,17 @@ def apply(ast: MalType, env: Env) -> MalType:
             newEnv.set(keys.pop().data, eval(vals.pop(), env))
         return eval(ast.data[2], newEnv)
 
+    if first.data == 'do':
+        return eval_ast(MalType.list(ast.data[1:]), env)[-1]
+
+    if first.data == 'if':
+        result = eval(ast.data[1], env)
+        if result.type not in ['false', 'nil']:
+            return eval(ast.data[2], env)
+        if len(ast.data) < 4:
+            return MalType.nil()
+        return eval(ast.data[3], env)
+
     ast = eval_ast(ast, env)
     result = ast[0].data(ast[1:])
     return result

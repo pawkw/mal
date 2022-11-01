@@ -4,6 +4,9 @@ from typing import List, Any
 from modules.MalType import MalType, delimiters
 
 def get_value(item: MalType, convert_strings) -> str:
+    if item.type == "function":
+        return "#<function>"
+
     if item.type == "hashkey":
         return ':' + item.data[1:]
 
