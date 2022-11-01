@@ -9,6 +9,7 @@ def apply(ast: MalType, env: Env) -> MalType:
         return eval(body, newEnv)
 
     first = ast.data[0]
+    
     if first.data == 'def!':
         env.set(ast.data[1].data, eval(ast.data[2], env))
         return env.get(ast.data[1])
@@ -21,7 +22,9 @@ def apply(ast: MalType, env: Env) -> MalType:
         args = ast.data[1]
         keys = args.data[::2]
         vals = args.data[1::2]
-        newEnv = Env(env, keys, vals)
+        newEnv = Env(env)
+        for key, val in zip(keys, vals):
+            newEnv.set(key.data, eval(val, newEnv))
         return eval(ast.data[2], newEnv)
 
     if first.data == 'do':
@@ -39,6 +42,9 @@ def apply(ast: MalType, env: Env) -> MalType:
         return MalType.function(partial(fn, ast.data[1], ast.data[2]))
 
     ast = eval_ast(ast, env)
+    if ast[0].isType('error'):
+        return ast[0]
+
     result = ast[0].data(ast[1:], env)
     return result
 
@@ -48,7 +54,7 @@ def eval_ast(ast: MalType, env: Env) -> MalType:
             result = env.get(ast)
             if not result.isType('nil'):
                 return result
-            raise Exception(f"{ast.data} not found in scope.\n{env}")
+            return MalType.error(f"'{ast.data}' not found.")
     if ast.isCollection():
         if ast.type == 'list':
             contents = [eval(x, env) for x in ast.data]
@@ -65,5 +71,8 @@ def eval(ast: MalType, env: Env) -> MalType:
             return MalType.vector([eval(x, env) for x in ast.data])
         if ast.type == "hashmap":
             return MalType.hashmap([eval(x, env) for x in ast.data])
+
+    if ast.isType('error'):
+        return ast
 
     return eval_ast(ast, env)

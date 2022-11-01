@@ -26,7 +26,6 @@ class Env:
             return self
 
         if self.parent is None:
-            print("Parent is None.")
             return None
 
         return self.parent.find(key)

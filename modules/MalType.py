@@ -88,3 +88,7 @@ class MalType:
         result = cls("function", contents)
         result.builtin = builtin
         return result
+
+    @classmethod
+    def error(cls, contents: str) -> "MalType":
+        return cls("error", contents)
