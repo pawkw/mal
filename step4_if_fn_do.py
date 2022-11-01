@@ -6,7 +6,6 @@ from modules.print_mal import print_mal
 from modules.builtins import builtins
 from modules.Env import Env
 from modules.MalError import MalError
-import sys, traceback
 
 root_env = Env(None)
 for func in builtins.items():
@@ -29,5 +28,5 @@ if __name__ == "__main__":
         except MalError as error:
             print(error.args[0])
         except Exception as error:
-            print("".join(traceback.format_exception(*sys.exc_info())))
+            print(error)
         

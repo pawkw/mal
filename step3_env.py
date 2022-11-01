@@ -5,6 +5,7 @@ from modules.eval import eval
 from modules.print_mal import print_mal
 from modules.builtins import builtins
 from modules.Env import Env
+from modules.MalError import MalError
 
 root_env = Env(None)
 for func in builtins.items():
@@ -24,4 +25,6 @@ if __name__ == "__main__":
         except EOFError:
             print("\nExiting.")
             break
+        except MalError as error:
+            print(error.args[0])
         

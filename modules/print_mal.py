@@ -18,11 +18,11 @@ def get_value(item: MalType, convert_strings) -> str:
     for char in item.data:
         if escape:
             if char == 'n':
-                result += '\n'
+                result += '\\n'
             elif char == '\\':
-                result += '\\'
+                result += '\\\\'
             elif char == '"':
-                result += '"'
+                result += '\\"'
             escape = False
             continue
                 
@@ -31,7 +31,7 @@ def get_value(item: MalType, convert_strings) -> str:
             continue
 
         result += char
-    return result
+    return f'"{result}"'
 
 def pr_str(item: MalType, print_readably: bool) -> str:
     if not item.isCollection():
@@ -42,21 +42,8 @@ def pr_str(item: MalType, print_readably: bool) -> str:
         if not exp.isCollection():
             result += " " + get_value(exp, print_readably)
             continue
-        result += pr_str(exp, print_readably)
-    result = delimiters[item.type]['start'] + result + ' ' + delimiters[item.type]['end']
-    return result
-
-def mal_string(exp: MalType, readably: bool) -> str:
-    if not exp.isCollection():
-        return (exp.type + ":" if readably else "") + get_value(exp, readably)
-    
-    result = ""
-    for item in exp.data:
-        if not item.isCollection():
-            result += " " + (item.type  + ":" if readably else "") + get_value(item, readably) + " "
-            continue
-        result += mal_string(item, readably)
-    result = delimiters[exp.type]['start'] + result + delimiters[exp.type]['end']
+        result += " " + pr_str(exp, print_readably)
+    result = delimiters[item.type]['start'] + result.strip() + delimiters[item.type]['end']
     return result
 
 def print_mal(exp: MalType, readably = True) -> None:
