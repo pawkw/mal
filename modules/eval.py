@@ -7,7 +7,7 @@ from modules.Env import Env
 def apply(ast: MalType, env: Env) -> MalType:
     first = ast.data[0]
     if first.data == 'def!':
-        env.set(ast.data[1].data, ast.data[2])
+        env.set(ast.data[1].data, eval(ast.data[2], env))
         return env.get(ast.data[1].data)
 
     if first.data == 'let*':
@@ -16,7 +16,7 @@ def apply(ast: MalType, env: Env) -> MalType:
         keys = args.data[::2]
         vals = args.data[1::2]
         while keys:
-            newEnv.set(keys.pop().data, vals.pop())
+            newEnv.set(keys.pop().data, eval(vals.pop(), env))
         return eval(ast.data[2], newEnv)
 
     ast = eval_ast(ast, env)

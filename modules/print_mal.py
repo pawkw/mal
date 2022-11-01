@@ -30,6 +30,18 @@ def get_value(item: MalType, convert_strings) -> str:
         result += char
     return result
 
+def pr_str(item: MalType, print_readably: bool) -> str:
+    if not item.isCollection():
+        return get_value(item, print_readably)
+    
+    result = ""
+    for exp in item.data:
+        if not exp.isCollection():
+            result += " " + get_value(exp, print_readably)
+            continue
+        result += pr_str(exp, print_readably)
+    result = delimiters[item.type]['start'] + result + ' ' + delimiters[item.type]['end']
+    return result
 
 def mal_string(exp: MalType, readably: bool) -> str:
     if not exp.isCollection():
@@ -45,5 +57,4 @@ def mal_string(exp: MalType, readably: bool) -> str:
     return result
 
 def print_mal(exp: MalType, readably = True) -> None:
-    print(exp)
-    # print(mal_string(exp, True))
+    print(pr_str(exp, readably))

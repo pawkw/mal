@@ -64,15 +64,15 @@ class MalType:
 
     @classmethod
     def nil(cls) -> "MalType":
-        return cls("nil", None)
+        return cls("nil", 'nil')
 
     @classmethod
     def true(cls) -> "MalType":
-        return cls("true", True)
+        return cls("true", 'true')
 
     @classmethod
     def false(cls) -> "MalType":
-        return cls("vector", False)
+        return cls("false", 'false')
 
     @classmethod
     def hashkey(cls, contents: str) -> "MalType":
@@ -80,7 +80,7 @@ class MalType:
 
     @classmethod
     def comment(cls, contents: str) -> "MalType":
-        return cls("vector", contents)
+        return cls("comment", contents)
 
     @classmethod
     def function(cls, contents: Any, builtin = False) -> "MalType":
