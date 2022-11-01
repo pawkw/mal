@@ -9,45 +9,50 @@ def apply(ast: MalType, env: Env) -> MalType:
         newEnv = Env(env, binds.data, exprs)
         return eval(body, newEnv)
 
-    first = ast.data[0]
-    
-    if first.data == 'def!':
-        env.set(ast.data[1].data, eval(ast.data[2], env))
-        return env.get(ast.data[1])
+    while True:
+        first = ast.data[0]
+        
+        if first.data == 'def!':
+            env.set(ast.data[1].data, eval(ast.data[2], env))
+            return env.get(ast.data[1])
 
-    if first.data == 'env':
-        print(env)
-        return MalType.nil()
-
-    if first.data == 'let*':
-        args = ast.data[1]
-        keys = args.data[::2]
-        vals = args.data[1::2]
-        newEnv = Env(env)
-        for key, val in zip(keys, vals):
-            newEnv.set(key.data, eval(val, newEnv))
-        return eval(ast.data[2], newEnv)
-
-    if first.data == 'do':
-        return eval_ast(MalType.list(ast.data[1:]), env)[-1]
-
-    if first.data == 'if':
-        result = eval(ast.data[1], env)
-        if result.type not in ['false', 'nil']:
-            return eval(ast.data[2], env)
-        if len(ast.data) < 4:
+        if first.data == 'env':
+            print(env)
             return MalType.nil()
-        return eval(ast.data[3], env)
 
-    if first.data == 'fn*':
-        return MalType.function(partial(fn, env, ast.data[1], ast.data[2]))
+        if first.data == 'let*':
+            args = ast.data[1]
+            keys = args.data[::2]
+            vals = args.data[1::2]
+            newEnv = Env(env)
+            for key, val in zip(keys, vals):
+                newEnv.set(key.data, eval(val, newEnv))
+            env = newEnv
+            ast = ast.data[2]
+            print(f"ast = {ast}")
+            continue
+            # return eval(ast.data[2], newEnv)
 
-    ast = eval_ast(ast, env)
-    if ast[0].isType('error'):
-        return ast[0]
+        if first.data == 'do':
+            return eval_ast(MalType.list(ast.data[1:]), env)[-1]
 
-    result = ast[0].data(ast[1:])
-    return result
+        if first.data == 'if':
+            result = eval(ast.data[1], env)
+            if result.type not in ['false', 'nil']:
+                return eval(ast.data[2], env)
+            if len(ast.data) < 4:
+                return MalType.nil()
+            return eval(ast.data[3], env)
+
+        if first.data == 'fn*':
+            return MalType.function(partial(fn, env, ast.data[1], ast.data[2]))
+
+        ast = eval_ast(ast, env)
+        if ast[0].isType('error'):
+            return ast[0]
+
+        result = ast[0].data(ast[1:])
+        return result
 
 def eval_ast(ast: MalType, env: Env) -> MalType:
     if not ast.isCollection():
@@ -61,17 +66,78 @@ def eval_ast(ast: MalType, env: Env) -> MalType:
     return ast
 
 def eval(ast: MalType, env: Env) -> MalType:
-    if ast.isCollection():
+    def fn(env: Env, binds: MalType, body: MalType, exprs: MalType):
+        newEnv = Env(env, binds.data, exprs)
+        return eval(body, newEnv)
+
+    while True:
+        if ast.isType('error'):
+            return ast
+
+        if not ast.isCollection():
+            return eval_ast(ast, env)
+        
         if ast.isEmpty():
             return ast
-        if ast.type == "list":
-            return apply(ast, env)
         if ast.type == "vector":
             return MalType.vector([eval(x, env) for x in ast.data])
         if ast.type == "hashmap":
             return MalType.hashmap([eval(x, env) for x in ast.data])
 
-    if ast.isType('error'):
-        return ast
+        first = ast.data[0]
+        
+        if first.data == 'def!':
+            env.set(ast.data[1].data, eval(ast.data[2], env))
+            return env.get(ast.data[1])
 
-    return eval_ast(ast, env)
+        if first.data == 'env':
+            print(env)
+            return MalType.nil()
+
+        if first.data == 'let*':
+            args = ast.data[1]
+            keys = args.data[::2]
+            vals = args.data[1::2]
+            newEnv = Env(env)
+            for key, val in zip(keys, vals):
+                newEnv.set(key.data, eval(val, newEnv))
+            env = newEnv
+            ast = ast.data[2]
+            print(f"ast = {ast}")
+            continue
+            # return eval(ast.data[2], newEnv)
+
+        if first.data == 'do':
+            ast = eval_ast(MalType.list(ast.data[1:]), env)[-1]
+            continue
+
+        if first.data == 'if':
+            result = eval(ast.data[1], env)
+            if result.type not in ['false', 'nil']:
+                ast = ast.data[2]
+                continue
+            if len(ast.data) < 4:
+                return MalType.nil()
+            ast = ast.data[3]
+            continue
+
+        if first.data == 'fn*':
+            result = MalType.function(partial(fn, env, ast.data[1], ast.data[2]))
+            result.ast = ast.data[2]
+            result.params = ast.data[1].data
+            result.env = env
+            return result
+
+        ast = eval_ast(ast, env)
+        func = ast[0]
+        data = ast[1:]
+        if func.builtin == True:
+            return func.data(data)
+
+        ast = func.ast
+        env = Env(func.env, func.params, data)
+
+
+
+        
+    
