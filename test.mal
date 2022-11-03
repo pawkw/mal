@@ -1,0 +1,7 @@
+(def! double (fn* (a) (* a 2)))
+
+(def! power (fn* (a pwr)
+    (if (= 1 pwr)
+        a
+        (* a (power a (- pwr 1))))
+))

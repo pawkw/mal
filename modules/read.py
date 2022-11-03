@@ -39,10 +39,19 @@ def read_list(reader: Reader, delimiter: str) -> List:
             raise Exception(f"Expected {delimiter} in {reader.string!r}")
         if token.token_str == delimiter:
             return result
-        result.append(read_form(reader))
+        next = read_form(reader)
+        if next.isType('comment'):
+            continue
+        result.append(next)
 
 def read_form(reader: Reader) -> MalType:
     peek = reader.peek().token_str
+    if peek == '@':
+        token = reader.next()
+        return MalType.list([
+            MalType.symbol('deref'),
+            MalType.symbol(token.token_str)
+        ])
     if peek == '(':
         return MalType.list(read_list(reader, ')'))
     if peek == '[':

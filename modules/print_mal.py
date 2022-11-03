@@ -10,6 +10,9 @@ def get_value(item: MalType, convert_strings) -> str:
     if item.type == "hashkey":
         return ':' + item.data[1:]
 
+    if item.type == "atom":
+        return f"(atom {pr_str(item.data, convert_strings)})"
+
     if item.type != "string" or not convert_strings:
         return str(item.data)
 

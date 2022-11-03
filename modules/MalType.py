@@ -92,3 +92,7 @@ class MalType:
     @classmethod
     def error(cls, contents: str) -> "MalType":
         return cls("error", contents)
+
+    @classmethod
+    def atom(cls, contents: str) -> "MalType":
+        return cls("atom", contents)

@@ -1,7 +1,9 @@
 from functools import reduce
 import operator
+from modules.MalError import MalError
 from modules.MalType import MalType
 from modules.print_mal import pr_str
+from modules.read import read_str
 from typing import List
 
 def mal_pr_str(args):
@@ -46,6 +48,15 @@ def mal_equate(args):
     result = mal_equate([args[0], args[1]])
     return MalType.true() if rest.isType('true') and result.isType('true') else MalType.false()
 
+def slurp(fileName: str) -> MalType:
+    with open(fileName, 'r') as f:
+        data = f.read()
+
+    if not data:
+        raise MalError(f"Could not open '{fileName}'.")
+
+    return MalType.string(data)
+
 builtins = {
     '+': MalType.function(lambda args: reduce(lambda x, y: MalType.integer(x.data + y.data), args), builtin=True),
     '-': MalType.function(lambda args: reduce(lambda x, y: MalType.integer(x.data - y.data), args), builtin=True),
@@ -58,6 +69,7 @@ builtins = {
     'if': MalType.symbol('if'),
     'fn*': MalType.symbol('fn*'),
     'env': MalType.symbol('env'),
+    'eval': MalType.symbol('eval'),
     'prn': MalType.function(lambda args: mal_prn(args), builtin=True),
     'pr-str': MalType.function(lambda args: mal_pr_str(args), builtin=True),
     'str': MalType.function(lambda args: mal_str(args, " "), builtin=True),
@@ -70,5 +82,13 @@ builtins = {
     '<=': MalType.function(lambda args: mal_compare(args, operator.le), builtin=True),
     '>': MalType.function(lambda args: mal_compare(args, operator.gt), builtin=True),
     '>=': MalType.function(lambda args: mal_compare(args, operator.ge), builtin=True),
-    '=': MalType.function(lambda args: mal_equate(args), builtin=True)
+    '=': MalType.function(lambda args: mal_equate(args), builtin=True),
+    'read-string': MalType.function(lambda args: read_str(args[0].data), builtin=True),
+    'slurp': MalType.function(lambda args: slurp(args[0].data), builtin=True),
+    'load-file': MalType.symbol('load-file'),
+    'atom': MalType.function(lambda args: MalType.atom(args[0]), builtin=True),
+    'atom?': MalType.function(lambda args: MalType.true() if args[0].isType('atom') else MalType.false(), builtin=True),
+    'deref': MalType.function(lambda args: args[0].data, builtin=True),
+    'swap!': MalType.symbol('swap!'),
+    'reset!': MalType.symbol('reset!'),
 }
